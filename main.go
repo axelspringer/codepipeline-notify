@@ -4,54 +4,49 @@ import (
 	"context"
 	"errors"
 	"os"
-	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
-	l "github.com/axelspringer/vodka-aws/lambda"
 	event "github.com/eawsy/aws-lambda-go-event/service/lambda/runtime/event/codepipelineevt"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
-	defaultEnvProjectID = "PROJECT_ID"
-	defaultTimeout      = 3000
+	defaultEnvSSMPath = "SSM_PATH"
 )
 
+// runtime
 var (
-	errNoProjectID = errors.New("no ProjectID present")
-
-	parameters = []string{"ecs-cluster"}
+	ssmPath string
 )
+
+// errors
+var (
+	errNoSSMPath = errors.New("no SSM path configured")
+)
+
+func init() {
+	log.SetOutput(os.Stdout)
+	log.SetLevel(log.InfoLevel)
+}
 
 // Handler is executed by AWS Lambda in the main function. Once the request
 // is processed, it returns an Amazon API Gateway response object to AWS Lambda
 func Handler(ctx context.Context, event event.Event) error {
 	var err error
 
-	withTimeout, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
-	defer cancel()
-
-	deploy, err := NewDeploy(withTimeout, event.Job)
-	if err != nil {
-		return err
-	}
-
-	projectID, ok := os.LookupEnv(defaultEnvProjectID)
+	ssmPath, ok := os.LookupEnv(defaultEnvSSMPath)
 	if !ok {
-		err = deploy.putJobFailure(NewFailure(err))
-		return errNoProjectID
+		return errNoSSMPath
 	}
 
-	lambdaFunc := l.New(projectID)
-	if _, err := lambdaFunc.Store.TestEnv(parameters); err != nil {
-		err = deploy.putJobFailure(NewFailure(err))
-		return err
-	}
+	// logger
+	logger := log.WithFields(log.Fields{
+		"ssmPath": ssmPath,
+		"event":   event,
+	})
 
-	env, err := lambdaFunc.Store.GetEnv()
-	if err != nil {
-		err = deploy.putJobFailure(NewFailure(err))
-		return err
-	}
+	// log
+	logger.Info("Configured")
 
 	return err // noop
 }
