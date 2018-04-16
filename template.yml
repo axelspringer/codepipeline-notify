@@ -22,19 +22,19 @@ Parameters:
 Outputs:
   LambdaFunction:
     Description: Information about the value
-    Value: !GetAtt ECSDeploy.Arn
+    Value: !GetAtt CodePipelineNotify.Arn
     Export:
       Name: !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaFunction']]
 
 Resources:
-  ECSDeploy:
+  CodePipelineNotify:
     Type: AWS::Serverless::Function
     Properties:
       Handler: main
       Runtime: go1.x
       Environment: 
         Variables:
-          PROJECT_ID: !Ref 'ProjectId'
+          SSM_PATH: !Ref 'ProjectId'
       VpcConfig:
         SecurityGroupIds: !Ref 'VpcSecurityGroupIds'
         SubnetIds: !Ref 'VpcSubnetIds'

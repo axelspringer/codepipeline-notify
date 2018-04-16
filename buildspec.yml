@@ -15,6 +15,10 @@ phases:
       # Install Testify to use common assertions and mocks in tests
       - go get -u github.com/stretchr/testify
 
+      # Install Ginkgo & Gomega
+      - go get -u github.com/onsi/ginkgo
+      - go get -u github.com/onsi/gomega
+
   pre_build:
     commands:
 
@@ -31,7 +35,7 @@ phases:
       - go tool vet .
 
       # Run all tests included with our application
-      - go test .
+      - ginkgo
 
   build:
     commands:

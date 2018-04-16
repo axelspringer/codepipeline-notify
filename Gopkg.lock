@@ -12,10 +12,111 @@
   version = "v1.1.0"
 
 [[projects]]
+  name = "github.com/aws/aws-sdk-go"
+  packages = [
+    "aws",
+    "aws/awserr",
+    "aws/awsutil",
+    "aws/client",
+    "aws/client/metadata",
+    "aws/corehandlers",
+    "aws/credentials",
+    "aws/credentials/ec2rolecreds",
+    "aws/credentials/endpointcreds",
+    "aws/credentials/stscreds",
+    "aws/defaults",
+    "aws/ec2metadata",
+    "aws/endpoints",
+    "aws/request",
+    "aws/session",
+    "aws/signer/v4",
+    "internal/sdkio",
+    "internal/sdkrand",
+    "internal/shareddefaults",
+    "private/protocol",
+    "private/protocol/json/jsonutil",
+    "private/protocol/jsonrpc",
+    "private/protocol/query",
+    "private/protocol/query/queryutil",
+    "private/protocol/rest",
+    "private/protocol/xml/xmlutil",
+    "service/ssm",
+    "service/ssm/ssmiface",
+    "service/sts"
+  ]
+  revision = "9b0098a71f6d4d473a26ec8ad3c2feaac6eb1da6"
+  version = "v1.13.32"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/axelspringer/vodka-aws"
+  packages = [
+    "lambda",
+    "store"
+  ]
+  revision = "f5d161a6b43386d9ade62cfbe5b33deb11a4c540"
+
+[[projects]]
   branch = "master"
   name = "github.com/eawsy/aws-lambda-go-event"
-  packages = ["service/lambda/runtime/event/codepipelineevt"]
+  packages = ["service/lambda/runtime/event/snsevt"]
   revision = "e888a5ec6428554de39d49d6eda94f60027cfb81"
+
+[[projects]]
+  name = "github.com/go-ini/ini"
+  packages = ["."]
+  revision = "ace140f73450505f33e8b8418216792275ae82a7"
+  version = "v1.35.0"
+
+[[projects]]
+  name = "github.com/jmespath/go-jmespath"
+  packages = ["."]
+  revision = "0b12d6b5"
+
+[[projects]]
+  name = "github.com/onsi/ginkgo"
+  packages = [
+    ".",
+    "config",
+    "extensions/table",
+    "internal/codelocation",
+    "internal/containernode",
+    "internal/failer",
+    "internal/leafnodes",
+    "internal/remote",
+    "internal/spec",
+    "internal/spec_iterator",
+    "internal/specrunner",
+    "internal/suite",
+    "internal/testingtproxy",
+    "internal/writer",
+    "reporters",
+    "reporters/stenographer",
+    "reporters/stenographer/support/go-colorable",
+    "reporters/stenographer/support/go-isatty",
+    "types"
+  ]
+  revision = "9eda700730cba42af70d53180f9dcce9266bc2bc"
+  version = "v1.4.0"
+
+[[projects]]
+  name = "github.com/onsi/gomega"
+  packages = [
+    ".",
+    "format",
+    "internal/assertion",
+    "internal/asyncassertion",
+    "internal/oraclematcher",
+    "internal/testingtsupport",
+    "matchers",
+    "matchers/support/goraph/bipartitegraph",
+    "matchers/support/goraph/edge",
+    "matchers/support/goraph/node",
+    "matchers/support/goraph/util",
+    "types"
+  ]
+  revision = "003f63b7f4cff3fc95357005358af2de0f5fe152"
+  version = "v1.3.0"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -27,7 +128,17 @@
   branch = "master"
   name = "golang.org/x/crypto"
   packages = ["ssh/terminal"]
-  revision = "b2aa35443fbc700ab74c586ae79b81c171851023"
+  revision = "d6449816ce06963d9d136eee5a56fca5b0616e7e"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom",
+    "html/charset"
+  ]
+  revision = "500e7a4f953ddaf55d316b4d3adc516aa0379622"
 
 [[projects]]
   branch = "master"
@@ -36,11 +147,41 @@
     "unix",
     "windows"
   ]
-  revision = "1d206c9fa8975fb4cf00df1dc8bf3283dc24ba0e"
+  revision = "2f57af4873d00d535c5c9028850aa2152e6a5566"
+
+[[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "encoding",
+    "encoding/charmap",
+    "encoding/htmlindex",
+    "encoding/internal",
+    "encoding/internal/identifier",
+    "encoding/japanese",
+    "encoding/korean",
+    "encoding/simplifiedchinese",
+    "encoding/traditionalchinese",
+    "encoding/unicode",
+    "internal/gen",
+    "internal/tag",
+    "internal/utf8internal",
+    "language",
+    "runes",
+    "transform",
+    "unicode/cldr"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "gopkg.in/yaml.v2"
+  packages = ["."]
+  revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
+  version = "v2.2.1"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "c7f3921015ecdba0c066732b61c6dd36ee522107b9ef2837a5aa43a62c1ca329"
+  inputs-digest = "e1c7fe72b36aed11ca1a976b73dd5a961b09483fdb12081d75f389bbef9a9522"
   solver-name = "gps-cdcl"
   solver-version = 1
