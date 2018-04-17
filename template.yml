@@ -50,7 +50,7 @@ Resources:
             - "CodePipelineNotify"
             - "Arn"
           Protocol: "lambda"
-      TopicName: "codepipeline-slack-notify"
+      TopicName: "codepipeline-notify"
   CodePipelineEvents:
     Type: 'AWS::Events::Rule'
     Properties:
