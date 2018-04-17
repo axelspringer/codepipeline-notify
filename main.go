@@ -19,7 +19,7 @@ const (
 var (
 	ssmPath       string
 	ssmEnv        map[string]string
-	ssmParameters = []string{"hook", "channel"}
+	ssmParameters = []string{}
 )
 
 // errors
