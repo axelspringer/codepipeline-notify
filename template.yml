@@ -42,18 +42,43 @@ Resources:
         Fn::ImportValue:
           !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
 
-  CodePipelineSNSTopic: 
+  CodePipelineNotifySNSLambdaPermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      Principal: sns.amazonaws.com
+      SourceArn: !Ref CodePipelineNotifySNSTopic
+      FunctionName: !GetAtt
+        - CodePipelineNotify
+        - Arn
+
+  CodePipelineNotifySNSCWPolicy:
+    Type: AWS::SNS::TopicPolicy
+    Properties:
+      PolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Sid: AllowCloudWatchSNSTopic
+          Effect: Allow
+          Principal:
+            Service: events.amazonaws.com
+          Action: sns:Publish
+          Resource: "*"
+      Topics:
+        - !Ref CodePipelineNotifySNSTopic
+
+  CodePipelineNotifySNSTopic: 
     Type: AWS::SNS::Topic
     Properties: 
       Subscription: 
         - 
           Endpoint: !GetAtt 
-            - "CodePipelineNotify"
-            - "Arn"
+            - CodePipelineNotify
+            - Arn
           Protocol: "lambda"
       TopicName: "codepipeline-notify"
 
-  CodePipelineEvents:
+  CodePipelineNotifyEvents:
     Type: AWS::Events::Rule
     Properties:
       Description: Event rule for CodePipeline events
@@ -62,5 +87,5 @@ Resources:
           - aws.codepipeline
       State: ENABLED
       Targets:
-        - Arn: !Ref 'CodePipelineSNSTopic'
-          Id: !Ref 'CodePipelineNotify'
+        - Arn: !Ref CodePipelineNotifySNSTopic
+          Id: !Ref CodePipelineNotify

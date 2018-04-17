@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"os"
+	"time"
 
 	"github.com/aws/aws-lambda-go/lambda"
 	l "github.com/axelspringer/vodka-aws/lambda"
@@ -36,6 +37,9 @@ func init() {
 // Handler is executed by AWS Lambda in the main function
 func Handler(ctx context.Context, event event.Event) error {
 	var err error
+
+	ctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+	defer cancel()
 
 	// get SSM path from env
 	ssmPath, ok := os.LookupEnv(defaultEnvSSMPath)
