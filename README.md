@@ -7,7 +7,7 @@
 
 ## Getting Started
 
-tba
+The `template.yml` is a CloudFormation ChangeSet to CloudFormation Recipe available available in [vodka-tf](https://github.com/axelspringer/vodka-tf).
 
 ## License
 [MIT](/LICENSE)

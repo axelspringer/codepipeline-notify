@@ -89,3 +89,60 @@ Resources:
       Targets:
         - Arn: !Ref CodePipelineNotifySNSTopic
           Id: !Ref CodePipelineNotify
+
+  CodePipelineNotifyDynamoDBRole: 
+    Type: AWS::IAM::Policy
+    Properties: 
+      PolicyName: !Join [ "-", [ !Ref ProjectId, "dynamodb" ] ]
+      PolicyDocument: 
+        Version: "2012-10-17"
+        Statement: 
+          - 
+            Effect: "Allow"
+            Action:
+              - "dynamodb:GetItem"
+              - "dynamodb:Query"
+              - "dynamodb:Scan"
+              - "dynamodb:DescribeTable"
+            Resource:
+              - !GetAtt CodePipelineNotifyDynamoDBTable.Arn
+      Roles: 
+        - 
+          Fn::ImportValue: !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+
+  CodePipelineNotifyDynamoDBTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - 
+          AttributeName: "Pipeline"
+          AttributeType: "S"
+      KeySchema: 
+        - 
+          AttributeName: "Pipeline"
+          KeyType: "HASH"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: !Ref ProjectId
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "GlobalPipelineIndex"
+          KeySchema: 
+            - 
+              AttributeName: "Pipeline"
+              KeyType: "HASH"
+          Projection: 
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+      LocalSecondaryIndexes: 
+        - 
+          IndexName: "LocalPipelineIndex"
+          KeySchema: 
+            - 
+              AttributeName: "Pipeline"
+              KeyType: "HASH"
+          Projection: 
+            ProjectionType: "INCLUDE"

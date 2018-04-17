@@ -2,18 +2,26 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"os"
+	"sync"
 	"time"
 
+	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/dynamodb"
+	e "github.com/axelspringer/vodka-aws/events"
 	l "github.com/axelspringer/vodka-aws/lambda"
-	event "github.com/eawsy/aws-lambda-go-event/service/lambda/runtime/event/snsevt"
 	log "github.com/sirupsen/logrus"
 )
 
 const (
-	defaultEnvSSMPath = "SSM_PATH"
+	defaultTimeout     = 60
+	defaultEventSource = "aws:sns"
+	defaultEnvSSMPath  = "SSM_PATH"
 )
 
 // runtime
@@ -21,6 +29,8 @@ var (
 	ssmPath       string
 	ssmEnv        map[string]string
 	ssmParameters = []string{}
+
+	wg sync.WaitGroup
 )
 
 // errors
@@ -35,10 +45,10 @@ func init() {
 }
 
 // Handler is executed by AWS Lambda in the main function
-func Handler(ctx context.Context, event event.Event) error {
+func Handler(ctx context.Context, event events.SNSEvent) error {
 	var err error
 
-	ctx, cancel := context.WithTimeout(ctx, 5000*time.Millisecond)
+	ctx, cancel := context.WithTimeout(ctx, defaultTimeout*time.Second)
 	defer cancel()
 
 	// get SSM path from env
@@ -68,8 +78,81 @@ func Handler(ctx context.Context, event event.Event) error {
 		return logError(logger, err)
 	}
 
+	// prepare aws & dynamo
+	sess := session.New()
+	db := dynamodb.New(sess)
+
+	// create signaleer
+	signaleer := NewSignaleer(ctx, sess, db)
+
+	// api
+	// api := slack.New("TOKEN")
+
+	// parse all message records
+	for _, record := range event.Records {
+		var p = new(e.CodePipelineEvent)
+
+		// filter the events
+		if record.EventSource != defaultEventSource {
+			continue
+		}
+
+		// unmarshal the CodePipeline event
+		if err := json.Unmarshal([]byte(record.SNS.Message), &p); err != nil {
+			continue // pass along
+		}
+
+		// construct new signal
+		signal := &Signal{
+			TableName: ssmPath,
+			Detail:    p.Detail,
+		}
+
+		result, err := signaleer.GetPipeline(signal)
+
+		fmt.Println(signal, result, err)
+	}
+
+	signaleer.Wait() // wait
+
+	// wait for all records to be put
+	// <-wg.Wait()
+
+	// // configure message
+	// params := slack.PostMessageParameters{}
+	// attachment := slack.Attachment{
+	// 	Pretext: "some pretext",
+	// 	Text:    "some text",
+	// 	// Uncomment the following part to send a field too
+	// 	/*
+	// 		Fields: []slack.AttachmentField{
+	// 			slack.AttachmentField{
+	// 				Title: "a",
+	// 				Value: "no",
+	// 			},
+	// 		},
+	// 	*/
+	// }
+	// params.Attachments = []slack.Attachment{attachment}
+
+	// // post messags
+	// errGroup, errCtx := sl.PostMessage("TEST", "MESSAGE", params)
+
+	// if errGroup := g.Wait(); errGroup != nil {
+	//     return nil, err
+	// }
+	// return results, nil
+
 	return err // noop
 }
+
+// func postMessageWithContext(ctx context.Context, channelID string, message ) {
+// 	// logger
+// 	logger := log.WithFields(log.Fields{
+// 		"channel": "channel",
+// 		"pipeline": "pipline",
+// 	})
+// }
 
 func logError(logger *log.Entry, err error) error {
 	logger.Error(err)

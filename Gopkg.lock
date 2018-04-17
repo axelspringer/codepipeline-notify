@@ -4,6 +4,7 @@
 [[projects]]
   name = "github.com/aws/aws-lambda-go"
   packages = [
+    "events",
     "lambda",
     "lambda/messages",
     "lambdacontext"
@@ -40,6 +41,7 @@
     "private/protocol/query/queryutil",
     "private/protocol/rest",
     "private/protocol/xml/xmlutil",
+    "service/dynamodb",
     "service/ssm",
     "service/ssm/ssmiface",
     "service/sts"
@@ -51,10 +53,11 @@
   branch = "master"
   name = "github.com/axelspringer/vodka-aws"
   packages = [
+    "events",
     "lambda",
     "store"
   ]
-  revision = "f5d161a6b43386d9ade62cfbe5b33deb11a4c540"
+  revision = "a99c574a87ca94ec94346b69134bac8234d73d1d"
 
 [[projects]]
   branch = "master"
@@ -150,7 +153,7 @@
     "html/atom",
     "html/charset"
   ]
-  revision = "500e7a4f953ddaf55d316b4d3adc516aa0379622"
+  revision = "8d16fa6dc9a85c1cd3ed24ad08ff21cf94f10888"
 
 [[projects]]
   branch = "master"
@@ -159,7 +162,7 @@
     "unix",
     "windows"
   ]
-  revision = "2f57af4873d00d535c5c9028850aa2152e6a5566"
+  revision = "b126b21c05a91c856b027c16779c12e3bf236954"
 
 [[projects]]
   name = "golang.org/x/text"
@@ -194,6 +197,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "739435225c22f020addbe787360926483c67aeeb7644dcfbab626ac433e5f7e3"
+  inputs-digest = "839461c7be47b880878e2241bcd9bc6666933938d19462611b8ec1eadf31d481"
   solver-name = "gps-cdcl"
   solver-version = 1
