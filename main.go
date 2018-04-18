@@ -80,13 +80,10 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 
 	// prepare aws & dynamo
 	sess := session.New()
-	db := dynamodb.New(sess)
+	db := NewDB(ctx, dynamodb.New(sess), ssmPath)
 
 	// create signaleer
-	signaleer := NewSignaleer(ctx, sess, db)
-
-	// api
-	// api := slack.New("TOKEN")
+	signaleer := NewSignaleer(ctx)
 
 	// parse all message records
 	for _, record := range event.Records {
@@ -102,15 +99,17 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 			continue // pass along
 		}
 
-		// construct new signal
-		signal := &Signal{
-			TableName: ssmPath,
-			Detail:    p.Detail,
+		// get pipeline
+		slack, err := db.GetSlack(p.Detail, &Slack{})
+		if err != nil {
+			fmt.Println(err)
+			continue // pass along
 		}
 
-		result, err := signaleer.GetPipeline(signal)
+		// start event
+		// signaleer.Event(pipe.Item["token"], pipe.Item["channel"], p.Detail)
 
-		fmt.Println(signal, result, err)
+		fmt.Println(slack, err)
 	}
 
 	signaleer.Wait() // wait

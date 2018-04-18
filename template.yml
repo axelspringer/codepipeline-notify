@@ -90,7 +90,7 @@ Resources:
         - Arn: !Ref CodePipelineNotifySNSTopic
           Id: !Ref CodePipelineNotify
 
-  CodePipelineNotifyDynamoDBRole: 
+  CodePipelineNotifyDynamoDBRolePolicy: 
     Type: AWS::IAM::Policy
     Properties: 
       PolicyName: !Join [ "-", [ !Ref ProjectId, "dynamodb" ] ]
@@ -107,42 +107,40 @@ Resources:
             Resource:
               - !GetAtt CodePipelineNotifyDynamoDBTable.Arn
       Roles: 
-        - 
-          Fn::ImportValue: !Join ['-', [!Ref 'ProjectId', !Ref 'AWS::Region', 'LambdaTrustRole']]
+        - !Join [ "-", [ !Ref ProjectId, "lambda" ] ]
 
   CodePipelineNotifyDynamoDBTable: 
     Type: AWS::DynamoDB::Table
-    Properties: 
-      AttributeDefinitions: 
-        - 
+    Properties:
+      AttributeDefinitions:
+        -
           AttributeName: "Pipeline"
           AttributeType: "S"
-      KeySchema: 
-        - 
+        -
+          AttributeName: "Channel"
+          AttributeType: "S"
+        -
+          AttributeName: "Bot"
+          AttributeType: "S"
+      KeySchema:
+        -
           AttributeName: "Pipeline"
           KeyType: "HASH"
-      ProvisionedThroughput: 
-        ReadCapacityUnits: "5"
-        WriteCapacityUnits: "5"
-      TableName: !Ref ProjectId
-      GlobalSecondaryIndexes: 
-        - 
-          IndexName: "GlobalPipelineIndex"
-          KeySchema: 
-            - 
-              AttributeName: "Pipeline"
+        -
+          AttributeName: "Channel"
+          KeyType: "RANGE"
+      GlobalSecondaryIndexes:
+        -
+          IndexName: GlobalCodePipelineIndex
+          KeySchema:
+            -
+              AttributeName: "Bot"
               KeyType: "HASH"
-          Projection: 
-            ProjectionType: "INCLUDE"
-          ProvisionedThroughput: 
-            ReadCapacityUnits: "5"
-            WriteCapacityUnits: "5"
-      LocalSecondaryIndexes: 
-        - 
-          IndexName: "LocalPipelineIndex"
-          KeySchema: 
-            - 
-              AttributeName: "Pipeline"
-              KeyType: "HASH"
-          Projection: 
-            ProjectionType: "INCLUDE"
+          Projection:
+            ProjectionType: "KEYS_ONLY"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
