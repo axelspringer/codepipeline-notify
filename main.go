@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"os"
 	"sync"
 	"time"
@@ -101,61 +100,27 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 			continue          // pass along
 		}
 
-		var slacks []*Slack
+		var hooks []*WebHook
 
 		// get pipeline
-		slacks, err := db.QuerySlack(p.Detail, slacks)
+		hooks, err := db.QueryWebHooks(p.Detail, hooks)
 		if err != nil {
 			logger.Error(err) // log
 			continue          // pass along
 		}
 
+		for _, hook := range hooks {
+			err = hook.Send(ctx, p.Detail)
+		}
+
 		// start event
 		// signaleer.Event(pipe.Item["token"], pipe.Item["channel"], p.Detail)
-
-		fmt.Println(slacks, err)
 	}
 
 	signaleer.Wait() // wait
 
-	// wait for all records to be put
-	// <-wg.Wait()
-
-	// // configure message
-	// params := slack.PostMessageParameters{}
-	// attachment := slack.Attachment{
-	// 	Pretext: "some pretext",
-	// 	Text:    "some text",
-	// 	// Uncomment the following part to send a field too
-	// 	/*
-	// 		Fields: []slack.AttachmentField{
-	// 			slack.AttachmentField{
-	// 				Title: "a",
-	// 				Value: "no",
-	// 			},
-	// 		},
-	// 	*/
-	// }
-	// params.Attachments = []slack.Attachment{attachment}
-
-	// // post messags
-	// errGroup, errCtx := sl.PostMessage("TEST", "MESSAGE", params)
-
-	// if errGroup := g.Wait(); errGroup != nil {
-	//     return nil, err
-	// }
-	// return results, nil
-
 	return err // noop
 }
-
-// func postMessageWithContext(ctx context.Context, channelID string, message ) {
-// 	// logger
-// 	logger := log.WithFields(log.Fields{
-// 		"channel": "channel",
-// 		"pipeline": "pipline",
-// 	})
-// }
 
 func logError(logger *log.Entry, err error) error {
 	logger.Error(err)

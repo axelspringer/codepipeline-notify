@@ -22,8 +22,8 @@ func NewDB(ctx context.Context, db *dynamodb.DynamoDB, tableName string) *DB {
 	return &DB{ctx, db, tableName}
 }
 
-// GetSlack is getting a pipeline from the DynamoDB table
-func (d *DB) QuerySlack(event e.CodePipelineEventDetails, slacks []*Slack) ([]*Slack, error) {
+// QueryWebHooks is getting a pipeline from the DynamoDB table
+func (d *DB) QueryWebHooks(event e.CodePipelineEventDetails, hooks []*WebHook) ([]*WebHook, error) {
 	var err error
 
 	input := &dynamodb.QueryInput{
@@ -38,10 +38,10 @@ func (d *DB) QuerySlack(event e.CodePipelineEventDetails, slacks []*Slack) ([]*S
 
 	query, err := d.db.QueryWithContext(d.ctx, input)
 	if err != nil {
-		return slacks, err
+		return hooks, err
 	}
 
-	err = dynamodbattribute.UnmarshalListOfMaps(query.Items, slacks)
+	err = dynamodbattribute.UnmarshalListOfMaps(query.Items, &hooks)
 
-	return slacks, err // noop
+	return hooks, err // noop
 }

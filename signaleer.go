@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"sync"
 
 	e "github.com/axelspringer/vodka-aws/events"
@@ -26,19 +27,26 @@ func NewSignaleer(ctx context.Context) *Signaleer {
 }
 
 // Send is posting a message to a Slack Channel
-func (s *Signaleer) Send(sig Signal, event e.CodePipelineEventDetails) {
+func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetails) {
 	s.Lock() // safe
 	defer s.Unlock()
 
 	wg.Add(1) // new routine
 
-	go func(sig Signal) {
-		s.Lock() // safe
-		defer s.Unlock()
+	for _, hook := range webHooks {
+		go func(event e.CodePipelineEventDetails) {
+			err := hook.Send(s.ctx, event)
 
-		sig.Send(s.ctx) // send
-		wg.Done()       // done
-	}(sig)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			s.Lock() // safe
+			defer s.Unlock()
+
+			wg.Done()
+		}(event)
+	}
 }
 
 // Wait is using the WaitGroup to wait for all message to execute
