@@ -3,9 +3,10 @@ package main
 import (
 	"context"
 
+	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
+
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
-	"github.com/aws/aws-sdk-go/service/dynamodb/dynamodbattribute"
 	e "github.com/axelspringer/vodka-aws/events"
 )
 
@@ -22,24 +23,25 @@ func NewDB(ctx context.Context, db *dynamodb.DynamoDB, tableName string) *DB {
 }
 
 // GetSlack is getting a pipeline from the DynamoDB table
-func (d *DB) GetSlack(event e.CodePipelineEventDetails, slack *Slack) (*Slack, error) {
+func (d *DB) QuerySlack(event e.CodePipelineEventDetails, slacks []*Slack) ([]*Slack, error) {
 	var err error
 
-	input := &dynamodb.GetItemInput{
-		Key: map[string]*dynamodb.AttributeValue{
-			"Pipeline": {
+	input := &dynamodb.QueryInput{
+		ExpressionAttributeValues: map[string]*dynamodb.AttributeValue{
+			":v1": {
 				S: aws.String(event.Pipeline),
 			},
 		},
-		TableName: aws.String(d.tableName),
+		KeyConditionExpression: aws.String("Pipeline = :v1"),
+		TableName:              aws.String(d.tableName),
 	}
 
-	output, err := d.db.GetItemWithContext(d.ctx, input)
+	query, err := d.db.QueryWithContext(d.ctx, input)
 	if err != nil {
-		return slack, err
+		return slacks, err
 	}
 
-	err = dynamodbattribute.UnmarshalMap(output.Item, slack)
+	err = dynamodbattribute.UnmarshalListOfMaps(query.Items, slacks)
 
-	return slack, err // noop
+	return slacks, err // noop
 }

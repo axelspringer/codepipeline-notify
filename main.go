@@ -28,7 +28,7 @@ const (
 var (
 	ssmPath       string
 	ssmEnv        map[string]string
-	ssmParameters = []string{}
+	ssmParameters = []string{"dynamodb-tablename"}
 
 	wg sync.WaitGroup
 )
@@ -73,14 +73,14 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 	}
 
 	// prepare env
-	_, err = λ.Store.GetEnv()
+	env, err := λ.Store.GetEnv()
 	if err != nil {
 		return logError(logger, err)
 	}
 
 	// prepare aws & dynamo
 	sess := session.New()
-	db := NewDB(ctx, dynamodb.New(sess), ssmPath)
+	db := NewDB(ctx, dynamodb.New(sess), env["dynamodb-tablename"])
 
 	// create signaleer
 	signaleer := NewSignaleer(ctx)
@@ -91,25 +91,29 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 
 		// filter the events
 		if record.EventSource != defaultEventSource {
-			continue
+			logger.Error(err) // log
+			continue          // pass along
 		}
 
 		// unmarshal the CodePipeline event
 		if err := json.Unmarshal([]byte(record.SNS.Message), &p); err != nil {
-			continue // pass along
+			logger.Error(err) // log
+			continue          // pass along
 		}
 
+		var slacks []*Slack
+
 		// get pipeline
-		slack, err := db.GetSlack(p.Detail, &Slack{})
+		slacks, err := db.QuerySlack(p.Detail, slacks)
 		if err != nil {
-			fmt.Println(err)
-			continue // pass along
+			logger.Error(err) // log
+			continue          // pass along
 		}
 
 		// start event
 		// signaleer.Event(pipe.Item["token"], pipe.Item["channel"], p.Detail)
 
-		fmt.Println(slack, err)
+		fmt.Println(slacks, err)
 	}
 
 	signaleer.Wait() // wait
