@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"errors"
 	"os"
-	"sync"
 	"time"
 
 	"github.com/aws/aws-lambda-go/events"
@@ -28,8 +27,6 @@ var (
 	ssmPath       string
 	ssmEnv        map[string]string
 	ssmParameters = []string{"dynamodb-tablename"}
-
-	wg sync.WaitGroup
 )
 
 // errors
@@ -87,6 +84,7 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 	// parse all message records
 	for _, record := range event.Records {
 		var p = new(e.CodePipelineEvent)
+		var hooks []*WebHook
 
 		// filter the events
 		if record.EventSource != defaultEventSource {
@@ -100,8 +98,6 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 			continue          // pass along
 		}
 
-		var hooks []*WebHook
-
 		// get pipeline
 		hooks, err := db.QueryWebHooks(p.Detail, hooks)
 		if err != nil {
@@ -109,10 +105,9 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 			continue          // pass along
 		}
 
+		// push the found hooks to the signaleer,
+		// which then executed the hooks in goroutines
 		signaleer.Send(hooks, p.Detail)
-
-		// start event
-		// signaleer.Event(pipe.Item["token"], pipe.Item["channel"], p.Detail)
 	}
 
 	signaleer.Wait() // wait

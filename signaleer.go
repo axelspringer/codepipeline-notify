@@ -51,5 +51,5 @@ func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetail) {
 
 // Wait is using the WaitGroup to wait for all message to execute
 func (s *Signaleer) Wait() {
-	wg.Wait()
+	s.wg.Wait()
 }

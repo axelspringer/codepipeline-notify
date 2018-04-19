@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	e "github.com/axelspringer/vodka-aws/events"
+	log "github.com/sirupsen/logrus"
 )
 
 const (
@@ -25,9 +25,14 @@ type WebHook struct {
 func (w *WebHook) postPayload(webHookURL string, payload WebHookPayload) error {
 	var err error
 
+	// request log
+	logger := log.WithFields(log.Fields{
+		"webHookType": w.Type,
+	})
+
 	success, _, err := payload.Post(webHookURL) // omit response for now
 	if !success || err != nil {
-		fmt.Printf("Error sending payload. Status: %v", err)
+		logger.WithError(err)
 		return err
 	}
 
