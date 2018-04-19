@@ -109,9 +109,7 @@ func Handler(ctx context.Context, event events.SNSEvent) error {
 			continue          // pass along
 		}
 
-		for _, hook := range hooks {
-			err = hook.Send(ctx, p.Detail)
-		}
+		signaleer.Send(hooks, p.Detail)
 
 		// start event
 		// signaleer.Event(pipe.Item["token"], pipe.Item["channel"], p.Detail)

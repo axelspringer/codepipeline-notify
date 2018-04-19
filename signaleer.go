@@ -34,7 +34,7 @@ func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetails) 
 	wg.Add(1) // new routine
 
 	for _, hook := range webHooks {
-		go func(event e.CodePipelineEventDetails) {
+		go func(hook *WebHook, event e.CodePipelineEventDetails) {
 			err := hook.Send(s.ctx, event)
 
 			if err != nil {
@@ -45,7 +45,7 @@ func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetails) 
 			defer s.Unlock()
 
 			wg.Done()
-		}(event)
+		}(hook, event)
 	}
 }
 
