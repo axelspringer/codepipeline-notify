@@ -58,7 +58,7 @@
     "lambda",
     "store"
   ]
-  revision = "a99c574a87ca94ec94346b69134bac8234d73d1d"
+  revision = "8c0406d62c2907c79e2328928c093c542ae356b0"
 
 [[projects]]
   name = "github.com/dghubble/sling"
@@ -154,7 +154,7 @@
     "html/atom",
     "html/charset"
   ]
-  revision = "8d16fa6dc9a85c1cd3ed24ad08ff21cf94f10888"
+  revision = "d41e8174641f662c5a2d1c7a5f9e828788eb8706"
 
 [[projects]]
   branch = "master"
@@ -163,7 +163,7 @@
     "unix",
     "windows"
   ]
-  revision = "b126b21c05a91c856b027c16779c12e3bf236954"
+  revision = "3ccc7e5779793fd54564baf60c51bf017955e0ba"
 
 [[projects]]
   name = "golang.org/x/text"

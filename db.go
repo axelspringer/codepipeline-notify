@@ -23,7 +23,7 @@ func NewDB(ctx context.Context, db *dynamodb.DynamoDB, tableName string) *DB {
 }
 
 // QueryWebHooks is getting a pipeline from the DynamoDB table
-func (d *DB) QueryWebHooks(event e.CodePipelineEventDetails, hooks []*WebHook) ([]*WebHook, error) {
+func (d *DB) QueryWebHooks(event e.CodePipelineEventDetail, hooks []*WebHook) ([]*WebHook, error) {
 	var err error
 
 	input := &dynamodb.QueryInput{

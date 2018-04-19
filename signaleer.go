@@ -27,14 +27,14 @@ func NewSignaleer(ctx context.Context) *Signaleer {
 }
 
 // Send is posting a message to a Slack Channel
-func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetails) {
+func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetail) {
 	s.Lock() // safe
 	defer s.Unlock()
 
-	wg.Add(1) // new routine
-
 	for _, hook := range webHooks {
-		go func(hook *WebHook, event e.CodePipelineEventDetails) {
+		s.wg.Add(1) // new routine
+
+		go func(hook *WebHook, event e.CodePipelineEventDetail) {
 			err := hook.Send(s.ctx, event)
 
 			if err != nil {
@@ -44,7 +44,7 @@ func (s *Signaleer) Send(webHooks []*WebHook, event e.CodePipelineEventDetails) 
 			s.Lock() // safe
 			defer s.Unlock()
 
-			wg.Done()
+			s.wg.Done()
 		}(hook, event)
 	}
 }

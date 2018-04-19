@@ -21,27 +21,27 @@ type WebHook struct {
 	Type     string
 }
 
-// sendPayload is sending a WebHookPayload
-func (s *WebHook) sendPayload(url string, payload WebHookPayload) error {
+// postPayload is posting a WebHookPayload
+func (w *WebHook) postPayload(webHookURL string, payload WebHookPayload) error {
 	var err error
 
-	resp, err := payload.Send(url)
-
-	if resp.StatusCode >= 400 {
-		return fmt.Errorf("Error sending payload. Status: %v", resp.Status)
+	success, _, err := payload.Post(webHookURL) // omit response for now
+	if !success || err != nil {
+		fmt.Printf("Error sending payload. Status: %v", err)
+		return err
 	}
 
 	return err
 }
 
 // Send is sending a signal
-func (s *WebHook) Send(ctx context.Context, event e.CodePipelineEventDetails) error {
+func (w *WebHook) Send(ctx context.Context, event e.CodePipelineEventDetail) error {
 	var err error
 
-	switch webhookType := s.Type; webhookType {
+	switch webhookType := w.Type; webhookType {
 	case WebHookTypeSlack:
-		slack := NewSlackPayload(s.Channel, s.Bot, event)
-		err = s.sendPayload(s.URL, slack)
+		slack := NewSlackPayload(w.Channel, w.Bot, event)
+		err = w.postPayload(w.URL, slack)
 	default:
 	}
 
